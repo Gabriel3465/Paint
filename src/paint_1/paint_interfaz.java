@@ -309,19 +309,24 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 			super.paintComponent(g);
 			Graphics2D g2d = (Graphics2D) g;
 
-			g2d.setColor(Color.BLACK);
-			g2d.setStroke(new BasicStroke(3));
 
-			for (List<Point> trazo : listaDePuntos) {
+			for (int i = 0; i < listaDePuntos.size(); i++) {
+	        List<Point> trazo = listaDePuntos.get(i);
+	        float grosor = listaGrosor.get(i);
+	        
+	        g2d.setColor(Color.BLACK);
+	        g2d.setStroke(new BasicStroke(grosor));
+	        
+	        if (trazo.size() > 1) {
+	            for (int j = 1; j < trazo.size(); j++) {
+	                Point p1 = trazo.get(j-1);
+	                Point p2 = trazo.get(j);
+	                g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
+	            }
+	        }
+	    }
 
-				if (trazo.size() > 1) {
-					for (int i = 1; i < trazo.size(); i++) {
-						Point p1 = trazo.get(i - 1);
-						Point p2 = trazo.get(i);
-						g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
-					}
-				}
-			}
+
 
 			if (points.size() > 1) {
 				for (int i = 1; i < points.size(); i++) {
