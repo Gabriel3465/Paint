@@ -9,10 +9,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -25,6 +27,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+
+import paint_1.paint_interfaz.DrawingPanel.Triangulo;
+import paint_1.paint_interfaz.DrawingPanel.circulo;
+//import sun.jvm.hotspot.oops.java_lang_Class;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -33,7 +40,10 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	public JLabel textField_1 = new JLabel();
-	boolean pincel = false;
+
+	// 1 = pincel, 2 = seleccionador, 3 = rectangulo, 4 = triangulo, 5 = circulo
+	public int modos = 1;
+
 	private DrawingPanel drawingPanel;
 
 	private Point lastPoint;
@@ -42,6 +52,13 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 
 	public float grosor = 3;
 	private List<Float> listaGrosor = new ArrayList<>();
+
+	// Donde se guardan las figuras
+	private List<Rectangle> figuras = new ArrayList<>();
+
+	private List<Triangulo> figurasTriangulo = new ArrayList<>();
+
+	private List<circulo> figurasCirculos = new ArrayList<>();
 
 	/**
 	 * Launch the application.
@@ -140,20 +157,14 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 		panel.add(panel_3);
 		panel_3.setLayout(null);
 
-		JLabel lblNewLabel = new JLabel("Personalisar color:");
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		lblNewLabel.setBounds(10, 10, 129, 13);
-		panel_3.add(lblNewLabel);
-
-		JTextField textField = new JTextField();
-		textField.setText("#000000");
-		textField.setBounds(10, 33, 96, 19);
-		panel_3.add(textField);
-		textField.setColumns(10);
-
-		JButton btnNewButton_12 = new JButton("Establecer fondo");
+		JButton btnNewButton_12 = new JButton("Rectangulo");
+		btnNewButton_12.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				modos = 3;
+			}
+		});
 		btnNewButton_12.setFont(new Font("Tahoma", Font.PLAIN, 9));
-		btnNewButton_12.setBounds(10, 62, 119, 21);
+		btnNewButton_12.setBounds(10, 10, 119, 21);
 		panel_3.add(btnNewButton_12);
 
 		JLabel lblNewLabel_1 = new JLabel("Tamaño:");
@@ -215,7 +226,7 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 		JButton btnNewButton_16 = new JButton("Pincel");
 		btnNewButton_16.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				pincel = true;
+				modos = 1;
 			}
 		});
 		btnNewButton_16.setBounds(31, 141, 85, 21);
@@ -224,12 +235,32 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 		JButton btnNewButton_17 = new JButton("Seleccionador");
 		btnNewButton_17.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				pincel = false;
+				modos = 2;
 			}
 		});
 		btnNewButton_17.setFont(new Font("Tahoma", Font.PLAIN, 8));
 		btnNewButton_17.setBounds(31, 172, 85, 21);
 		panel_3.add(btnNewButton_17);
+
+		JButton btnNewButton_12_1 = new JButton("Triangulo");
+		btnNewButton_12_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				modos = 4;
+			}
+		});
+		btnNewButton_12_1.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		btnNewButton_12_1.setBounds(10, 35, 119, 21);
+		panel_3.add(btnNewButton_12_1);
+
+		JButton btnNewButton_12_1_1 = new JButton("Circulo");
+		btnNewButton_12_1_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				modos = 5;
+			}
+		});
+		btnNewButton_12_1_1.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		btnNewButton_12_1_1.setBounds(10, 62, 119, 21);
+		panel_3.add(btnNewButton_12_1_1);
 
 		drawingPanel = new DrawingPanel();
 		drawingPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
@@ -241,12 +272,27 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
+
+		//se toma en cuenta cual boton se presiono y resive las cordenadas
+		if (modos == 3) {
+			figuras.add(new Rectangle(e.getX(), e.getY(), 100, 100));
+			drawingPanel.repaint();
+		} else if (modos == 4) {
+			figurasTriangulo.add(new Triangulo
+					(e.getX(), e.getY(), e.getX() + 50, e.getY() - 50, e.getX() + 100, e.getY()));
+			drawingPanel.repaint();
+			drawingPanel.repaint();
+		} else if (modos == 5) {
+			figurasCirculos.add(new circulo(e.getX(), e.getY(), 100, 100));
+			drawingPanel.repaint();
+		}
+
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		if (pincel == true) {
+		if (modos == 1) {
 			lastPoint = e.getPoint();
 			points.add(lastPoint);
 		}
@@ -280,7 +326,7 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	public void mouseDragged(MouseEvent e) {
 		// TODO Auto-generated method stub
 
-		if (pincel == true) {
+		if (modos == 1) {
 
 			Point newPoint = e.getPoint();
 
@@ -309,24 +355,24 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 			super.paintComponent(g);
 			Graphics2D g2d = (Graphics2D) g;
 
+			g2d.setColor(Color.BLACK);
+			g2d.setStroke(new BasicStroke(3));
 
 			for (int i = 0; i < listaDePuntos.size(); i++) {
-	        List<Point> trazo = listaDePuntos.get(i);
-	        float grosor = listaGrosor.get(i);
-	        
-	        g2d.setColor(Color.BLACK);
-	        g2d.setStroke(new BasicStroke(grosor));
-	        
-	        if (trazo.size() > 1) {
-	            for (int j = 1; j < trazo.size(); j++) {
-	                Point p1 = trazo.get(j-1);
-	                Point p2 = trazo.get(j);
-	                g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
-	            }
-	        }
-	    }
+				List<Point> trazo = listaDePuntos.get(i);
+				float grosor = listaGrosor.get(i);
 
+				g2d.setColor(Color.BLACK);
+				g2d.setStroke(new BasicStroke(grosor));
 
+				if (trazo.size() > 1) {
+					for (int j = 1; j < trazo.size(); j++) {
+						Point p1 = trazo.get(j - 1);
+						Point p2 = trazo.get(j);
+						g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
+					}
+				}
+			}
 
 			if (points.size() > 1) {
 				for (int i = 1; i < points.size(); i++) {
@@ -336,6 +382,64 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 					g2d.setStroke(new BasicStroke(grosor));
 				}
 			}
+
+			// se dibuja la firgura
+			g2d.setStroke(new BasicStroke(grosor));
+			for (java.awt.Rectangle rect : figuras) {
+				g2d.drawRect(rect.x, rect.y, rect.width, rect.height);
+			}
+
+			for (Triangulo tri : figurasTriangulo) {
+				g2d.drawPolygon(tri.x, tri.y, 3);
+
+			}
+
+			for (circulo cir : figurasCirculos) {
+				g2d.drawOval(cir.x, cir.y, cir.h, cir.w);
+
+			}
+
 		}
+
+		class Rectangle {
+
+			private int x, y, w, h;
+
+			public Rectangle(int x, int y, int w, int h) {
+				this.x = x;
+				this.y = y;
+				this.w = w;
+				this.h = h;
+			}
+
+		}
+
+		static class Triangulo {
+			private int[] x = new int[3];
+			private int[] y = new int[3];
+
+			public Triangulo(int x1, int y1, int x2, int y2, int x3, int y3) {
+				this.x[0] = x1;
+				this.x[1] = x2;
+				this.x[2] = x3;
+				this.y[0] = y1;
+				this.y[1] = y2;
+				this.y[2] = y3;
+			}
+
+		}
+
+		static class circulo {
+
+			private int x, y, w, h;
+
+			public circulo(int x, int y, int w, int h) {
+				this.x = x;
+				this.y = y;
+				this.w = w;
+				this.h = h;
+			}
+		}
+
 	}
 }
