@@ -37,8 +37,8 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	private JPanel contentPane;
 	public JTextField textField_1 = new JTextField();
 
-	// 1 = pincel, 2 = seleccionador, 3 = rectangulo, 4 = triangulo, 
-	// 5 = circulo
+	// 1 = pincel, 2 = seleccionador, 3 = rectangulo, 4 = triangulo,
+	// 5 = circulo, 6 = borrador
 	public int modos = 1;
 
 	private DrawingPanel drawingPanel;
@@ -48,14 +48,18 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	private List<MyPoint> points = new ArrayList<>();
 	List<List<MyPoint>> listaDePuntos = new ArrayList<>();
 
+	// color y grosor general
 	public int grosor = 3;
+	public Color colorActual = Color.black;
+
+	// color y grosor de borrador
+	public int grosorBorrador = 40;
+	public Color colorBorrador = Color.WHITE;
 
 	// Donde se guardan las figuras
 	private List<Rectangle> figuras = new ArrayList<>();
 	private List<Triangulo> figurasTriangulo = new ArrayList<>();
 	private List<circulo> figurasCirculos = new ArrayList<>();
-
-	private Color colorActual = Color.black;
 
 	/**
 	 * Launch the application.
@@ -122,10 +126,10 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 		JButton btnNewButton_2 = new JButton("");
 		btnNewButton_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				colorActual = Color.decode("#80FFFF");
+				colorActual = Color.BLACK;
 			}
 		});
-		btnNewButton_2.setBackground(new Color(128, 255, 255));
+		btnNewButton_2.setBackground(new Color(0, 0, 0));
 		panel_2.add(btnNewButton_2);
 
 		JButton btnNewButton_3 = new JButton("");
@@ -351,8 +355,7 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 			drawingPanel.repaint();
 		} else if (modos == 4) {
 			figurasTriangulo
-					.add(new Triangulo(e.getX(), e.getY(), e.getX() + 50, e.getY() - 50, e.getX() + 100, e.getY()));
-			drawingPanel.repaint();
+				.add(new Triangulo(e.getX(), e.getY(), e.getX() + 50, e.getY() - 50, e.getX() + 100, e.getY()));
 			drawingPanel.repaint();
 		} else if (modos == 5) {
 			figurasCirculos.add(new circulo(e.getX(), e.getY(), 100, 100, colorActual, grosor));
@@ -364,8 +367,6 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	@Override
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
-		//se pasa la informacion de la linea
 		if (modos == 1) {
 			points.add(new MyPoint(e.getX(), e.getY(), colorActual, grosor));
 		}
@@ -374,7 +375,6 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
-
 		@SuppressWarnings("unchecked")
 		List<MyPoint> listaCopiada = (List<MyPoint>) (((ArrayList<MyPoint>) points).clone());
 		listaDePuntos.add(listaCopiada);
@@ -399,7 +399,12 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 		if (modos == 1) {
 			points.add(new MyPoint(e.getX(), e.getY(), colorActual, grosor));
 			drawingPanel.repaint();
-		} 
+		} else if (modos == 6) { 
+			// cambiamos a modo borrador al ser arrastrado
+			points.add(new MyPoint(e.getX(), e.getY(), colorBorrador, grosorBorrador));
+			drawingPanel.repaint();
+		}
+
 	}
 
 	@Override
@@ -425,7 +430,6 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 						Point p2 = trazo.get(i);
 						MyPoint actual = trazo.get(i);
 
-						// se invoca el grosor y color del array
 						g2d.setColor(actual.color);
 						g2d.setStroke(new BasicStroke(actual.grosor1));
 						g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
@@ -438,9 +442,16 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 					Point p1 = points.get(i - 1);
 					Point p2 = points.get(i);
 
-					// se pasa el color y grosor para actualizar al momento
-					g2d.setStroke(new BasicStroke(grosor));
-					g2d.setColor(colorActual);
+					// verificamos si esta en modo borrador
+					// le damos la informacion para que se actualize al momento
+					if (modos == 6) {
+						g2d.setStroke(new BasicStroke(grosorBorrador));
+						g2d.setColor(colorBorrador);
+					} else {
+						g2d.setStroke(new BasicStroke(grosor));
+						g2d.setColor(colorActual);
+					}
+
 					g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
 
 				}
@@ -467,10 +478,7 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	}
 
 	class Rectangle {
-
-		public int height;
-		public int width;
-		private int x, y, w, h;
+		public int height, width, x, y, w, h;
 
 		public Rectangle(int x, int y, int w, int h) {
 			this.x = x;
@@ -497,7 +505,6 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 	}
 
 	class circulo {
-
 		private int x, y, w, h, grosor1;
 		Color color;
 
@@ -511,7 +518,6 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 		}
 	}
 
-	// clase principal de dibujo
 	class MyPoint extends Point {
 		Color color;
 		int grosor1;
@@ -523,5 +529,4 @@ public class paint_interfaz extends JFrame implements MouseListener, MouseMotion
 			this.grosor1 = grosor1;
 		}
 	}
-
 }
